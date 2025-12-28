@@ -1,0 +1,120 @@
+-- =========================
+-- 1. Basic SELECT
+-- =========================
+-- View all customers
+SELECT * FROM customers;
+
+-- Customer name and city only
+SELECT name, city FROM customers;
+
+-- Orders after April 30, 2024
+SELECT * FROM orders
+WHERE order_date > '2024-04-30';
+
+-- Top 3 most expensive products
+SELECT * FROM products
+ORDER BY price DESC
+LIMIT 3;
+
+-- =========================
+-- 2. Aggregation Queries
+-- =========================
+-- Total number of customers
+SELECT COUNT(*) AS total_customers FROM customers;
+
+-- Total orders
+SELECT COUNT(*) AS total_orders FROM orders;
+
+-- Total revenue
+SELECT SUM(total_amount) AS total_revenue FROM orders;
+
+-- Average order value
+SELECT AVG(total_amount) AS avg_order_value FROM orders;
+
+-- Total spending per customer
+SELECT customer_id, SUM(total_amount) AS total_spent
+FROM orders
+GROUP BY customer_id;
+
+-- Number of orders per customer
+SELECT customer_id, COUNT(order_id) AS order_count
+FROM orders
+GROUP BY customer_id;
+
+-- =========================
+-- 3. JOIN Queries
+-- =========================
+-- Customer name with their orders
+SELECT c.name, o.order_id, o.order_date, o.total_amount
+FROM customers c
+INNER JOIN orders o
+ON c.customer_id = o.customer_id;
+
+-- Products sold in each order
+SELECT o.order_id, p.product_name, oi.quantity
+FROM orders o
+JOIN order_items oi ON o.order_id = oi.order_id
+JOIN products p ON oi.product_id = p.product_id;
+
+-- Revenue per product
+SELECT p.product_name, SUM(oi.quantity * p.price) AS product_revenue
+FROM order_items oi
+JOIN products p ON oi.product_id = p.product_id
+GROUP BY p.product_name
+ORDER BY product_revenue DESC;
+
+-- Total spending per customer with names
+SELECT c.name, SUM(o.total_amount) AS total_spent
+FROM customers c
+JOIN orders o ON c.customer_id = o.customer_id
+GROUP BY c.name
+ORDER BY total_spent DESC;
+
+-- Customers with no orders
+SELECT c.name
+FROM customers c
+LEFT JOIN orders o ON c.customer_id = o.customer_id
+WHERE o.order_id IS NULL;
+
+-- =========================
+-- 4. CASE & Subqueries
+-- =========================
+-- Categorize orders by value
+SELECT order_id, total_amount,
+CASE
+    WHEN total_amount >= 1000 THEN 'High Value'
+    WHEN total_amount BETWEEN 500 AND 999 THEN 'Medium Value'
+    ELSE 'Low Value'
+END AS order_category
+FROM orders;
+
+-- Customer segmentation
+SELECT c.name, SUM(o.total_amount) AS total_spent,
+CASE
+    WHEN SUM(o.total_amount) >= 1500 THEN 'VIP'
+    WHEN SUM(o.total_amount) BETWEEN 500 AND 1499 THEN 'Regular'
+    ELSE 'Low Value'
+END AS customer_segment
+FROM customers c
+JOIN orders o ON c.customer_id = o.customer_id
+GROUP BY c.name;
+
+-- Customers who spent more than average
+SELECT DISTINCT c.name
+FROM customers c
+JOIN orders o ON c.customer_id = o.customer_id
+WHERE o.total_amount > (SELECT AVG(total_amount) FROM orders);
+
+-- =========================
+-- 5. Views
+-- =========================
+-- Create reusable view for customer sales
+CREATE VIEW customer_sales AS
+SELECT c.customer_id, c.name, SUM(o.total_amount) AS total_spent
+FROM customers c
+JOIN orders o ON c.customer_id = o.customer_id
+GROUP BY c.customer_id, c.name;
+
+-- Use the view
+SELECT * FROM customer_sales
+ORDER BY total_spent DESC;

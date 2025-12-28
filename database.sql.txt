@@ -1,0 +1,87 @@
+-- =========================
+-- 1. CREATE DATABASE
+-- =========================
+CREATE DATABASE IF NOT EXISTS ecommerce_db;
+USE ecommerce_db;
+
+-- =========================
+-- 2. CREATE TABLES
+-- =========================
+
+-- Customers table
+CREATE TABLE IF NOT EXISTS customers (
+    customer_id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(100),
+    email VARCHAR(100),
+    city VARCHAR(50),
+    signup_date DATE
+);
+
+-- Products table
+CREATE TABLE IF NOT EXISTS products (
+    product_id INT AUTO_INCREMENT PRIMARY KEY,
+    product_name VARCHAR(100),
+    category VARCHAR(50),
+    price DECIMAL(10,2)
+);
+
+-- Orders table
+CREATE TABLE IF NOT EXISTS orders (
+    order_id INT AUTO_INCREMENT PRIMARY KEY,
+    customer_id INT,
+    order_date DATE,
+    total_amount DECIMAL(10,2),
+    FOREIGN KEY (customer_id) REFERENCES customers(customer_id)
+);
+
+-- Order_Items table
+CREATE TABLE IF NOT EXISTS order_items (
+    order_item_id INT AUTO_INCREMENT PRIMARY KEY,
+    order_id INT,
+    product_id INT,
+    quantity INT,
+    FOREIGN KEY (order_id) REFERENCES orders(order_id),
+    FOREIGN KEY (product_id) REFERENCES products(product_id)
+);
+
+-- =========================
+-- 3. INSERT SAMPLE DATA
+-- =========================
+
+-- Customers
+INSERT INTO customers (name, email, city, signup_date) VALUES
+('John Smith', 'john.smith@email.com', 'New York', '2024-01-15'),
+('Amina Rahman', 'amina.rahman@email.com', 'Dhaka', '2024-02-10'),
+('Michael Brown', 'michael.brown@email.com', 'Chicago', '2024-02-18'),
+('Sarah Johnson', 'sarah.j@email.com', 'Los Angeles', '2024-03-05'),
+('David Wilson', 'david.w@email.com', 'New York', '2024-03-20'),
+('Fatima Khan', 'fatima.k@email.com', 'Houston', '2024-04-01'),
+('Robert Lee', 'robert.lee@email.com', 'San Francisco', '2024-04-10');
+
+-- Products
+INSERT INTO products (product_name, category, price) VALUES
+('Laptop', 'Electronics', 1200.00),
+('Smartphone', 'Electronics', 800.00),
+('Headphones', 'Accessories', 150.00),
+('Office Chair', 'Furniture', 300.00),
+('Desk Lamp', 'Furniture', 60.00),
+('Backpack', 'Accessories', 90.00);
+
+-- Orders
+INSERT INTO orders (customer_id, order_date, total_amount) VALUES
+(1, '2024-04-05', 1350.00),
+(2, '2024-04-08', 800.00),
+(3, '2024-04-15', 300.00),
+(1, '2024-05-02', 150.00),
+(4, '2024-05-10', 1200.00),
+(5, '2024-05-15', 90.00);
+
+-- Order_Items
+INSERT INTO order_items (order_id, product_id, quantity) VALUES
+(1, 1, 1),
+(1, 3, 1),
+(2, 2, 1),
+(3, 4, 1),
+(4, 3, 1),
+(5, 1, 1),
+(6, 6, 1);
